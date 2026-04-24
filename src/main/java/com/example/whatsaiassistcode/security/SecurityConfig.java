@@ -31,7 +31,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/whatsapp/webhook").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/whatsapp/webhook").permitAll()
                         .requestMatchers(HttpMethod.GET, "/users/**").hasAnyRole(ROLE_READER, ROLE_WRITER)
+                        .requestMatchers(HttpMethod.POST, "/whatsapp/messages/**").hasRole(ROLE_WRITER)
                         .requestMatchers(HttpMethod.POST, "/users/**").hasRole(ROLE_WRITER)
                         .requestMatchers(HttpMethod.PUT, "/users/**").hasRole(ROLE_WRITER)
                         .requestMatchers(HttpMethod.DELETE, "/users/**").hasRole(ROLE_WRITER)

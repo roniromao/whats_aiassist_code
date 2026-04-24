@@ -58,13 +58,17 @@ docker compose down -v
 - `POST /users`
 - `PUT /users/{id}`
 - `DELETE /users/{id}`
+- `GET /whatsapp/webhook` (Meta webhook verification)
+- `POST /whatsapp/webhook` (Meta incoming webhook events)
+- `POST /whatsapp/messages/text` (send WhatsApp text message)
 
 ## Authorization
 
 The API now uses HTTP Basic authentication with two access levels:
 
 - `reader` / `reader123`: can call `GET /users` and `GET /users/{id}`
-- `admin` / `admin123`: can call all endpoints, including create, update, and delete
+- `admin` / `admin123`: can call all write endpoints, including `POST /whatsapp/messages/text`
+- `/whatsapp/webhook` is public by design so Meta can verify and deliver webhook events
 
 Example requests:
 
@@ -90,6 +94,32 @@ The app now accepts runtime overrides for containerized deployments:
 - `APP_SECURITY_READER_PASSWORD`
 - `APP_SECURITY_WRITER_USERNAME`
 - `APP_SECURITY_WRITER_PASSWORD`
+- `APP_WHATSAPP_API_VERSION` (default: `v23.0`)
+- `APP_WHATSAPP_PHONE_NUMBER_ID`
+- `APP_WHATSAPP_ACCESS_TOKEN`
+- `APP_WHATSAPP_VERIFY_TOKEN`
+
+## WhatsApp Meta API Setup
+
+1. Configure your app with environment variables:
+
+```bash
+APP_WHATSAPP_PHONE_NUMBER_ID=YOUR_PHONE_NUMBER_ID
+APP_WHATSAPP_ACCESS_TOKEN=YOUR_PERMANENT_SYSTEM_USER_TOKEN
+APP_WHATSAPP_VERIFY_TOKEN=YOUR_CUSTOM_VERIFY_TOKEN
+```
+
+2. In the Meta app webhook configuration, use:
+- Callback URL: `https://your-domain/whatsapp/webhook`
+- Verify token: same value as `APP_WHATSAPP_VERIFY_TOKEN`
+
+3. Send a text message through this API:
+
+```bash
+curl -u admin:admin123 -X POST http://localhost:8080/whatsapp/messages/text \
+  -H "Content-Type: application/json" \
+  -d "{\"to\":\"5511999999999\",\"text\":\"Hello from API\"}"
+```
 
 ## Notes
 
